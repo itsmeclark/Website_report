@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Discord Webhook • Website Report</title>
+  <style>
+    /* Global reset & base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #0b0f1c 0%, #1a1f2f 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    /* Main card */
+    .card {
+      background: rgba(20, 24, 35, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(88, 101, 242, 0.25);
+      border-radius: 2rem;
+      padding: 2rem 2.25rem;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(88, 101, 242, 0.15) inset;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .card:hover {
+      box-shadow: 0 30px 50px -15px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(88, 101, 242, 0.35) inset;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      color: #ffffff;
+      margin-bottom: 0.25rem;
+    }
+
+    h1 span {
+      background: #5865f2;
+      font-size: 1.3rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 3rem;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+
+    .subhead {
+      color: #a8b1d9;
+      font-size: 0.95rem;
+      margin-bottom: 1.9rem;
+      border-left: 3px solid #5865f2;
+      padding-left: 0.85rem;
+      font-weight: 400;
+      background: linear-gradient(90deg, rgba(88, 101, 242, 0.08), transparent);
+      border-radius: 0 4px 4px 0;
+    }
+
+    /* Form layout */
+    .report-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.35rem;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .input-group label {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+      color: #b9c2e3;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .input-group label i {
+      font-style: normal;
+      font-size: 1.1rem;
+      filter: drop-shadow(0 0 6px rgba(88, 101, 242, 0.6));
+    }
+
+    .input-group input,
+    .input-group textarea {
+      background: #0e121c;
+      border: 1.5px solid #282f44;
+      border-radius: 1rem;
+      padding: 0.9rem 1.2rem;
+      font-size: 0.98rem;
+      color: #f0f3ff;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+      width: 100%;
+      font-weight: 400;
+    }
+
+    .input-group input::placeholder,
+    .input-group textarea::placeholder {
+      color: #5b6485;
+      font-weight: 300;
+      font-size: 0.92rem;
+    }
+
+    .input-group input:focus,
+    .input-group textarea:focus {
+      border-color: #5865f2;
+      background: #12172a;
+      box-shadow: 0 0 0 3px rgba(88, 101, 242, 0.25);
+    }
+
+    .input-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    /* Submit button */
+    .submit-btn {
+      background: #5865f2;
+      border: none;
+      border-radius: 3rem;
+      padding: 1rem 2rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.7rem;
+      cursor: pointer;
+      margin-top: 0.75rem;
+      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
+      box-shadow: 0 12px 20px -12px #5865f2;
+      letter-spacing: 0.3px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .submit-btn:hover {
+      background: #4752c4;
+      box-shadow: 0 16px 25px -10px #5865f2;
+    }
+
+    .submit-btn:active {
+      transform: scale(0.98);
+      background: #3c45a5;
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    /* Status message */
+    .status {
+      margin-top: 1.2rem;
+      border-radius: 2rem;
+      padding: 0.9rem 1.4rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #1a1f2e;
+      border-left: 5px solid #5865f2;
+      color: #d0d9ff;
+      transition: opacity 0.2s;
+    }
+
+    .status.success {
+      border-left-color: #23a55a;
+      background: #1a2a1e;
+      color: #b3f0c0;
+    }
+
+    .status.error {
+      border-left-color: #f23f43;
+      background: #2a1a1c;
+      color: #ffb3b5;
+    }
+
+    .status i {
+      font-style: normal;
+      font-size: 1.3rem;
+    }
+
+    /* Hidden webhook input (optional helper) */
+    .webhook-hint {
+      font-size: 0.78rem;
+      color: #6a749b;
+      text-align: right;
+      margin-top: 0.2rem;
+    }
+
+    /* small */
+    .footer-note {
+      margin-top: 1.5rem;
+      font-size: 0.75rem;
+      color: #505a7a;
+      text-align: center;
+      border-top: 1px solid #202538;
+      padding-top: 1.2rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>
+      🌐 Webhook Report
+      <span>Discord</span>
+    </h1>
+    <div class="subhead">
+      Fill in the website details — they’ll be sent as a rich embed to your Discord webhook.
+    </div>
+
+    <form class="report-form" id="reportForm">
+      <!-- Website Name -->
+      <div class="input-group">
+        <label for="websiteName"><i>🏷️</i> Website name</label>
+        <input type="text" id="websiteName" name="websiteName" placeholder="e.g. Example Website" required>
+      </div>
+
+      <!-- URL -->
+      <div class="input-group">
+        <label for="url"><i>🔗</i> Website URL</label>
+        <input type="url" id="url" name="url" placeholder="https://example.com" required>
+      </div>
+
+      <!-- Owner -->
+      <div class="input-group">
+        <label for="owner"><i>👤</i> Website owner</label>
+        <input type="text" id="owner" name="owner" placeholder="e.g. Example Organization" required>
+      </div>
+
+      <!-- Description -->
+      <div class="input-group">
+        <label for="description"><i>📝</i> Description</label>
+        <textarea id="description" name="description" placeholder="A brief description of the website..." required></textarea>
+      </div>
+
+      <!-- Webhook URL (hidden in plain sight? we keep it as a constant, but you can change it) -->
+      <!-- For security, you'd normally keep this server-side. This is for demo. -->
+      <!-- I'll define it as a JS constant, but also keep a data attribute? No — better to just use a JS const -->
+      
+      <button type="submit" class="submit-btn" id="submitBtn">
+        <span>📨</span> Send report to Discord
+      </button>
+    </form>
+
+    <!-- Status message area -->
+    <div id="statusMessage" class="status" style="display: none;">
+      <i>⏳</i> <span id="statusText">Sending...</span>
+    </div>
+
+    <div class="footer-note">
+      ⚡ Data sent as an embed — fields: name, URL, owner, description.
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // --------------------------------------------------------------
+      // ⚠️ REPLACE THIS WITH YOUR ACTUAL DISCORD WEBHOOK URL
+      // --------------------------------------------------------------
+      const DISCORD_WEBHOOK_URL = "https://discordapp.com/api/webhooks/1558124804484235284/3m42bTVpirIoGzPSrHXQmwK_dLRHIrY_kw0SR2HAEygOsQpB4sOoEzu_c4VFUlBk2MDE";   // <-- paste here
+
+      // DOM elements
+      const form = document.getElementById('reportForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const statusDiv = document.getElementById('statusMessage');
+      const statusText = document.getElementById('statusText');
+      const statusIcon = statusDiv.querySelector('i'); // the icon element
+
+      // Helper to show status
+      function showStatus(type, message) {
+        statusDiv.style.display = 'flex';
+        statusDiv.className = 'status ' + type; // 'success' or 'error' or plain
+        if (type === 'success') {
+          statusIcon.textContent = '✅';
+        } else if (type === 'error') {
+          statusIcon.textContent = '❌';
+        } else {
+          statusIcon.textContent = '⏳';
+        }
+        statusText.textContent = message;
+      }
+
+      // Clear / reset status to default hidden after a while (optional)
+      function resetStatusLater(ms = 5000) {
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, ms);
+      }
+
+      // Form submission handler
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        // Gather values
+        const websiteName = document.getElementById('websiteName').value.trim();
+        const url = document.getElementById('url').value.trim();
+        const owner = document.getElementById('owner').value.trim();
+        const description = document.getElementById('description').value.trim();
+
+        // Basic validation (HTML required handles most, but just in case)
+        if (!websiteName || !url || !owner || !description) {
+          showStatus('error', 'All fields are required.');
+          resetStatusLater(3000);
+          return;
+        }
+
+        // Optional: validate URL format (simple)
+        try {
+          new URL(url); // will throw if invalid
+        } catch {
+          showStatus('error', 'Please enter a valid URL (including http:// or https://).');
+          resetStatusLater(3000);
+          return;
+        }
+
+        // Check if webhook URL is set
+        if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL === "https://discordapp.com/api/webhooks/1558124804484235284/3m42bTVpirIoGzPSrHXQmwK_dLRHIrY_kw0SR2HAEygOsQpB4sOoEzu_c4VFUlBk2MDE") {
+          showStatus('error', '⚠️ Webhook URL not configured. Set DISCORD_WEBHOOK_URL in the script.');
+          resetStatusLater(5000);
+          return;
+        }
+
+        // Disable button while sending
+        submitBtn.disabled = true;
+        showStatus('', 'Sending report to Discord...');
+
+        // Build the embed payload exactly as specified
+        const payload = {
+          embeds: [
+            {
+              title: "Website Information Report",
+              color: 5793266,        // #5865F2 in decimal
+              fields: [
+                {
+                  name: "🌐 Website Name",
+                  value: websiteName,
+                  inline: false
+                },
+                {
+                  name: "🔗 Website URL",
+                  value: url,
+                  inline: false
+                },
+                {
+                  name: "👤 Website Owner",
+                  value: owner,
+                  inline: false
+                },
+                {
+                  name: "📝 Description",
+                  value: description,
+                  inline: false
+                }
+              ],
+              footer: {
+                text: "Website Reconnaissance Report"
+              }
+            }
+          ]
+        };
+
+        try {
+          const response = await fetch(DISCORD_WEBHOOK_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+
+          if (response.ok) {
+            // 204 No Content is typical for webhook success
+            showStatus('success', 'Report sent successfully! Check your Discord channel.');
+            // Optionally reset form? We'll keep values but you can uncomment:
+            // form.reset();
+          } else {
+            // Try to get error details
+            let errorMsg = `Discord returned ${response.status}`;
+            try {
+              const errorData = await response.json();
+              if (errorData.message) errorMsg += `: ${errorData.message}`;
+            } catch (e) { /* ignore */ }
+            showStatus('error', `Failed: ${errorMsg}`);
+          }
+        } catch (networkError) {
+          showStatus('error', `Network error: ${networkError.message}. Check webhook URL and CORS.`);
+        } finally {
+          submitBtn.disabled = false;
+          // Auto-hide the status after a while (but keep it visible for success/error)
+          if (statusDiv.classList.contains('success') || statusDiv.classList.contains('error')) {
+            resetStatusLater(6000);
+          } else {
+            resetStatusLater(3000);
+          }
+        }
+      });
+
+      // Prefill the webhook constant reminder (only for the developer)
+      // (No UI for webhook url, just a note)
+      console.log('🔧 Discord webhook endpoint:', DISCORD_WEBHOOK_URL === "https://discordapp.com/api/webhooks/1558124804484235284/3m42bTVpirIoGzPSrHXQmwK_dLRHIrY_kw0SR2HAEygOsQpB4sOoEzu_c4VFUlBk2MDE" 
+        ? '⚠️ NOT SET — replace DISCORD_WEBHOOK_URL in the script' 
+        : '✅ Set (length: ' + DISCORD_WEBHOOK_URL.length + ')');
+    })();
+  </script>
+</body>
+</html>
