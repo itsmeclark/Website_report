@@ -259,10 +259,6 @@
         <textarea id="description" name="description" placeholder="A brief description of the website..." required></textarea>
       </div>
 
-      <!-- Webhook URL (hidden in plain sight? we keep it as a constant, but you can change it) -->
-      <!-- For security, you'd normally keep this server-side. This is for demo. -->
-      <!-- I'll define it as a JS constant, but also keep a data attribute? No — better to just use a JS const -->
-      
       <button type="submit" class="submit-btn" id="submitBtn">
         <span>📨</span> Send report to Discord
       </button>
@@ -397,8 +393,15 @@
           if (response.ok) {
             // 204 No Content is typical for webhook success
             showStatus('success', 'Report sent successfully! Check your Discord channel.');
-            // Optionally reset form? We'll keep values but you can uncomment:
-            // form.reset();
+            
+            // --------------------------------------------------------------
+            // ✅ CLEAR ALL INPUT FIELDS AFTER SUCCESSFUL SEND
+            // --------------------------------------------------------------
+            document.getElementById('websiteName').value = '';
+            document.getElementById('url').value = '';
+            document.getElementById('owner').value = '';
+            document.getElementById('description').value = '';
+            // Optionally reset any focus / placeholder state (not necessary but clean)
           } else {
             // Try to get error details
             let errorMsg = `Discord returned ${response.status}`;
