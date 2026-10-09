@@ -340,11 +340,11 @@
         }
 
         // Check if webhook URL is set
-        if (!DISCORD_WEBHOOK_URL || DISCORD_WEBHOOK_URL === "https://discordapp.com/api/webhooks/1558124804484235284/3m42bTVpirIoGzPSrHXQmwK_dLRHIrY_kw0SR2HAEygOsQpB4sOoEzu_c4VFUlBk2MDE") {
-          showStatus('error', '⚠️ Webhook URL not configured. Set DISCORD_WEBHOOK_URL in the script.');
+        if (!DISCORD_WEBHOOK_URL) {
+          showStatus('error', 'Webhook URL not configured.');
           resetStatusLater(5000);
           return;
-        }
+      }
 
         // Disable button while sending
         submitBtn.disabled = true;
